@@ -1,88 +1,228 @@
-AWS DevOps CI/CD Pipeline Project
-📌 Overview
+ AWS DevOps CI/CD Pipeline – Detailed Documentation
 
-This project demonstrates a fully automated CI/CD pipeline on AWS that builds, containerizes, and deploys a Node.js application using managed AWS services.
 
-The pipeline ensures continuous integration and continuous deployment with zero manual intervention.
+📌 1. Project Overview
 
-🧩 Architecture
+This project demonstrates the implementation of a fully automated CI/CD pipeline on AWS for deploying a containerized Node.js application.
 
-GitHub → CodePipeline → CodeBuild → ECR → ECS (Fargate) → Load Balancer
-🛠️ AWS Services Used
-AWS CodePipeline – CI/CD orchestration
-AWS CodeBuild – Build & Docker image creation
-Amazon ECR – Docker image storage
-Amazon ECS – Container deployment
-AWS Fargate – Serverless compute
-Elastic Load Balancing – Application exposure
-⚙️ How It Works
-Developer pushes code to GitHub
-AWS CodePipeline is triggered automatically
-AWS CodeBuild builds Docker image
-Image is pushed to Amazon ECR
-Amazon ECS pulls latest image
-Application is deployed via Load Balancer
-🐳 Dockerization
+The pipeline integrates multiple AWS services to enable continuous integration, automated builds, containerization, and deployment with minimal manual intervention.
 
-The application is containerized using Docker for:
 
-Environment consistency
-Easy deployment
-Scalability
-📁 Project Structure
-.
-├── app.js
-├── package.json
-├── Dockerfile
-├── buildspec.yml
-└── README.md
 
-🔄 CI/CD Pipeline Features
-Fully automated deployment
-Continuous integration & delivery
-Zero downtime deployment (ECS rolling update)
-Scalable infrastructure
 
-🌐 Application Endpoints
-Endpoint	Description
-/Main application
-/health	Health check
-/debug	Debug information
-/change	Deployment verification
-🧪 How to Test Pipeline
-Make changes in code
-Push to GitHub
+
+🎯 2. Objectives
+
+
+Automate build and deployment process
+Implement CI/CD using AWS-native services
+Use Docker for containerization
+Deploy application using scalable infrastructure
+Ensure faster and reliable releases
+
+
+
+
+🧩 3. Architecture Overview
+
+
+
+The system follows a modern DevOps pipeline:
+
+GitHub →  CodePipeline  →  CodeBuild  →  ECR  →  ECS (Fargate)  →  Load Balancer  →  User
+
+
+
+
+🛠️ 4. Services Used
+
+🔹 AWS CodePipeline
+
+   Orchestrates the CI/CD workflow
+   Connects source, build, and deployment stages
+
+
+🔹 AWS CodeBuild
+
+   Builds the application
+   Creates Docker image
+   Pushes image to registry
+
+
+🔹 Amazon ECR
+
+   Stores Docker images
+   Acts as private container registry
+
+
+🔹 Amazon ECS
+
+
+   Runs containers
+   Manages deployment and scaling
+
+
+🔹 AWS Fargate
+
+   Serverless compute for containers
+   Eliminates server management
+
+
+🔹 Elastic Load Balancing
+
+   Distributes traffic
+   Provides public access to application
+
+
+🔹 AWS IAM
+
+   Manages roles and permissions
+
+⚙️ 5. Application Details
+
+     Backend: Node.js (Express)
+    Port: 3000
+    Endpoints:
+    / → Main application
+    /health → Health check
+    /debug → Debug info
+    /change → Deployment verification
+
+
+🐳 6. Docker Configuration
+
+      Dockerfile
+      FROM node:18
+
+     WORKDIR /app
+     COPY package*.json ./
+     RUN npm install
+
+     COPY . .
+
+     EXPOSE 3000
+     CMD ["node", "app.js"]
+
+
+🔄 7. CI/CD Pipeline Workflow
+
+
+      Step-by-Step Process
+      Developer pushes code to GitHub
+      AWS CodePipeline detects change
+      Source code is sent to build stage
+      AWS CodeBuild:
+      Builds Docker image
+      Tags image
+      Pushes image to Amazon ECR
+      Generates imagedefinitions.json
+      Deployment stage:
+      Amazon ECS pulls latest image
+      Updates running service
+      Performs rolling deployment
+
+
+📄 8. Build Specification (buildspec.yml)
+
+
+version: 0.2
+
+env:
+  variables:
+    IMAGE_REPO_NAME: node-app
+    IMAGE_TAG: latest
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging into Amazon ECR
+      - ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+      - REGION=us-east-1
+      - REPO_URI=$ACCOUNT_ID.dkr.ecr.$REGION.amazonaws.com/$IMAGE_REPO_NAME
+      - aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $REPO_URI
+
+  build:
+    commands:
+      - docker build -t $IMAGE_REPO_NAME .
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $REPO_URI:$IMAGE_TAG
+
+  post_build:
+    commands:
+      - docker push $REPO_URI:$IMAGE_TAG
+      - printf '[{"name":"container","imageUri":"%s"}]' $REPO_URI:$IMAGE_TAG > imagedefinitions.json
+
+artifacts:
+  files:
+    - imagedefinitions.json
+
+
+
+
+🚀 9. Deployment Strategy
+
+
+Deployment Type: Rolling Update
+Platform: ECS Fargate
+Load Balancer: Application Load Balancer
+
+
+
+🧪 10. Testing the Pipeline
+
+
+Modify application code
+Push changes to GitHub
 Pipeline triggers automatically
 Verify updated output in browser
 
-⚠️ Challenges Faced
 
-ECR repository mismatch issues
-Container name mismatch in ECS
-Buildspec configuration errors
+⚠️ 11. Challenges Faced
 
+
+❌ Issues
+ECR repository mismatch
+Incorrect region configuration
+Container name mismatch
+Missing imagedefinitions.json
 ✅ Solutions
-
-Ensured consistent naming across services
+Standardized naming conventions
+Verified AWS region
+Matched ECS container name with buildspec
 Debugged using build logs
-Corrected imagedefinitions.json
 
-🎯 Key Learnings
-End-to-end CI/CD pipeline design
-Docker containerization
+
+📈 12. Key Features
+
+
+Fully automated CI/CD pipeline
+Docker-based deployment
+Scalable container orchestration
+Load-balanced architecture
+Zero manual deployment
+
+
+🎯 13. Key Learnings
+
+
+CI/CD pipeline design
 AWS DevOps services integration
-Debugging real-world deployment issues
+Docker container lifecycle
+Debugging cloud deployments
 
-🚀 Future Enhancements
+
+🔮 14. Future Enhancements
+
+
 Add Amazon CloudWatch for monitoring
 Integrate Amazon RDS
-Implement Blue-Green deployment strategy
-Add custom domain with HTTPS
-🏆 Conclusion
+Implement Blue-Green deployment
+Add HTTPS with domain
 
-This project showcases a real-world DevOps workflow using AWS, demonstrating automation, scalability, and efficient deployment practices.
+
+🏁 15. Conclusion
+
+This project successfully demonstrates a real-world DevOps pipeline using AWS services, enabling automated, scalable, and efficient application deployment.
 
 👨‍💻 Author
 
 Aryan
-
