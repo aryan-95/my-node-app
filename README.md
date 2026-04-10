@@ -45,7 +45,7 @@ Scalable infrastructure
 
 🌐 Application Endpoints
 Endpoint	Description
-/	Main application
+/Main application
 /health	Health check
 /debug	Debug information
 /change	Deployment verification
@@ -66,11 +66,13 @@ Buildspec configuration errors
 Ensured consistent naming across services
 Debugged using build logs
 Corrected imagedefinitions.json
+
 🎯 Key Learnings
 End-to-end CI/CD pipeline design
 Docker containerization
 AWS DevOps services integration
 Debugging real-world deployment issues
+
 🚀 Future Enhancements
 Add Amazon CloudWatch for monitoring
 Integrate Amazon RDS
